@@ -47,6 +47,9 @@ class ClipTimestamp:
     full_text: str
     highlight_text: str
 
+    def _lt_(self, other):
+        return self.score < other.score
+
 # Main Class
 class YoutubeShortsMaker:
     def _init_(self, video_path: str):
@@ -55,6 +58,8 @@ class YoutubeShortsMaker:
         self.classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
         self.whisper_model = whisper.load_model("base")
         os.makedirs("output", exist_ok=True)
+    
+    
 
     def generate_transcript(self) -> List[dict]:
         """Generate transcript with timestamps."""
@@ -281,6 +286,15 @@ class YoutubeShortsMaker:
 
 # Entry Point
 if _name_ == "_main_":
-    video_path = "/Users/kalyanreddy/Learning/hackathon/video.mp4"
+    def download_youtube_video(url, output_path="video.mp4"):
+        ydl_opts = {
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',
+            'outtmpl': output_path
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        return output_path
+    url=input("enter the url of youtube viedo")
+    video_path = download_youtube_video(link)
     shorts_maker = YoutubeShortsMaker(video_path)
     shorts_maker.process_video()
